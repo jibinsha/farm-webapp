@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+openpyxl
+python-multipart
+folium
+osmnx
+networkx
+scikit-learn
+python-tsp
+numpy
