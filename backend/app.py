@@ -6,6 +6,23 @@ import pandas as pd
 import os
 
 from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy import text
+
+DATABASE_URL = os.getenv("postgresql://farmbd_user:AdBrkpWbJsqd2NfLd9NB9u3umr451PLL@dpg-d89cmmvavr4c73chgl6g-a/farmbd")
+
+engine = create_engine(postgresql://farmbd_user:AdBrkpWbJsqd2NfLd9NB9u3umr451PLL@dpg-d89cmmvavr4c73chgl6g-a/farmbd)
+with engine.begin() as conn:
+
+    conn.execute(text("""
+
+        CREATE TABLE IF NOT EXISTS completed_farmers (
+
+            bp_number TEXT PRIMARY KEY
+
+        )
+
+    """))
 
 # ---------------------------------------------------
 # APP
@@ -53,28 +70,26 @@ routes_df = routes_df.fillna("")
 # CREATE PROGRESS FILE
 # ---------------------------------------------------
 
-if not os.path.exists(progress_file):
+@app.get("/progress")
+def get_progress():
 
-    progress_df = pd.DataFrame(columns=[
-        "Bp Number",
-        "Status",
-        "Completed_Time"
-    ])
+    with engine.begin() as conn:
 
-    progress_df.to_csv(progress_file, index=False)
+        result = conn.execute(text("""
 
-@app.get("/days")
-def get_days():
+            SELECT bp_number
+            FROM completed_farmers
 
-    days = sorted(
-        farmers_df['Day']
-        .astype(str)
-        .unique()
-        .tolist(),
-        key=lambda x: int(x)
-    )
+        """))
 
-    return days
+        completed = [
+
+            {"Bp Number": row[0]}
+
+            for row in result.fetchall()
+        ]
+
+    return completed
 
 # ---------------------------------------------------
 # GET TEAMS
@@ -165,61 +180,40 @@ def get_route(day: str, team: str):
 @app.post("/complete/{bp_number}")
 def complete_farmer(bp_number: str):
 
-    progress_df = pd.read_csv(progress_file)
+    with engine.begin() as conn:
 
-    current_time = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
+        conn.execute(text("""
 
-    progress_df = progress_df[
-        progress_df['Bp Number']
-        !=
-        bp_number
-    ]
+            INSERT INTO completed_farmers (bp_number)
 
-    new_row = pd.DataFrame([{
-        "Bp Number": bp_number,
-        "Status": "Completed",
-        "Completed_Time": current_time
-    }])
+            VALUES (:bp)
 
-    progress_df = pd.concat(
-        [progress_df, new_row],
-        ignore_index=True
-    )
+            ON CONFLICT (bp_number)
 
-    progress_df.to_csv(
-        progress_file,
-        index=False
-    )
+            DO NOTHING
 
-    return {
-        "message": "Farmer marked completed"
-    }
+        """), {"bp": bp_number})
+
+    return {"status": "success"}
 
 # ---------------------------------------------------
 # UNDO COMPLETE
 # ---------------------------------------------------
 
 @app.post("/undo/{bp_number}")
-def undo_complete(bp_number: str):
+def undo_farmer(bp_number: str):
 
-    progress_df = pd.read_csv(progress_file)
+    with engine.begin() as conn:
 
-    progress_df = progress_df[
-        progress_df['Bp Number']
-        !=
-        bp_number
-    ]
+        conn.execute(text("""
 
-    progress_df.to_csv(
-        progress_file,
-        index=False
-    )
+            DELETE FROM completed_farmers
 
-    return {
-        "message": "Completion removed"
-    }
+            WHERE bp_number = :bp
+
+        """), {"bp": bp_number})
+
+    return {"status": "success"}
 
 # ---------------------------------------------------
 # GET PROGRESS
