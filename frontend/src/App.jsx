@@ -714,7 +714,7 @@ useEffect(() => {
 
                      resize: 'none',
 
-                     fontSize: '14px'
+                     fontSize: '14px',
                      
                      fontFamily: 'inherit'
 
