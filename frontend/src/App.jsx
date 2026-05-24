@@ -101,24 +101,6 @@ function App() {
 
   const [expandedFarmer, setExpandedFarmer] = useState(null)
 
-  const [comments, setComments] = useState({})
-
-  // ---------------------------------------------------
-  // NEW STATES
-  // ---------------------------------------------------
-
-  const [activePage, setActivePage] =
-    useState('dashboard')
-
-  const [searchQuery, setSearchQuery] =
-    useState('')
-
-  const [searchResults, setSearchResults] =
-    useState([])
-
-  const [teamPerformance, setTeamPerformance] =
-    useState([])
-
   // ---------------------------------------------------
   // LOAD DAYS
   // ---------------------------------------------------
@@ -172,52 +154,6 @@ function App() {
   }, [selectedDay, selectedTeam])
 
   // ---------------------------------------------------
-  // SEARCH FARMER
-  // ---------------------------------------------------
-
-  const searchFarmer = async () => {
-
-    try {
-
-      const res = await axios.get(
-
-        `https://farm-webapp-6ew5.onrender.com/search/${searchQuery}`
-
-      )
-
-      setSearchResults(res.data)
-
-    } catch (error) {
-
-      console.log(error)
-
-    }
-  }
-
-  // ---------------------------------------------------
-  // TEAM PERFORMANCE
-  // ---------------------------------------------------
-
-  const loadTeamPerformance = async () => {
-
-    try {
-
-      const res = await axios.get(
-
-        'https://farm-webapp-6ew5.onrender.com/team-performance'
-
-      )
-
-      setTeamPerformance(res.data)
-
-    } catch (error) {
-
-      console.log(error)
-
-    }
-  }
-
-  // ---------------------------------------------------
   // LOAD PROGRESS
   // ---------------------------------------------------
 
@@ -243,10 +179,25 @@ function App() {
 
   }
 
-  // ---------------------------------------------------
-  // LOAD COMMENTS
-  // ---------------------------------------------------
+useEffect(() => {
 
+  loadProgress()
+
+  loadComments()
+
+  const interval = setInterval(() => {
+
+    loadProgress()
+
+    loadComments()
+
+  }, 3000)
+
+  return () => clearInterval(interval)
+
+}, [])
+
+  const [comments, setComments] = useState({})
   const loadComments = async () => {
 
     try {
@@ -272,46 +223,6 @@ function App() {
 
     }
   }
-
-  // ---------------------------------------------------
-  // AUTO REFRESH
-  // ---------------------------------------------------
-
-  useEffect(() => {
-
-    loadProgress()
-
-    loadComments()
-
-    loadTeamPerformance()
-
-    const interval = setInterval(() => {
-
-      loadProgress()
-
-      loadComments()
-
-      loadTeamPerformance()
-
-      if (selectedDay && selectedTeam) {
-
-        axios.get(
-          `https://farm-webapp-6ew5.onrender.com/farmers/${selectedDay}/${selectedTeam}`
-        )
-          .then(res => setFarmers(res.data))
-
-      }
-
-    }, 3000)
-
-    return () => clearInterval(interval)
-
-  }, [selectedDay, selectedTeam])
-
-  // ---------------------------------------------------
-  // SAVE COMMENT
-  // ---------------------------------------------------
-
   const saveComment = async (
     bpNumber,
     comment
@@ -337,7 +248,7 @@ function App() {
 
     }
   }
-
+  
   // ---------------------------------------------------
   // COMPLETE FARMER
   // ---------------------------------------------------
@@ -441,459 +352,674 @@ function App() {
 
       </div>
 
-      {/* TOP NAVIGATION */}
+      {/* FILTER BAR */}
+
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          background: 'white',
+          padding: '15px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '10px',
+          alignItems: 'center',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        }}
+      >
+
+        {/* DATE */}
+
+        <select
+          value={selectedDay}
+          onChange={(e) => {
+
+            setSelectedDay(e.target.value)
+
+            setSelectedTeam('')
+            setFarmers([])
+            setRoute(null)
+
+          }}
+          style={{
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid #dcdcdc',
+            minWidth: '150px'
+          }}
+        >
+
+          <option value=''>
+            Select Date
+          </option>
+
+          {
+            days.map(day => (
+
+              <option
+                key={day}
+                value={day}
+              >
+                {day}
+              </option>
+
+            ))
+          }
+
+        </select>
+
+        {/* TEAM */}
+
+        <select
+          value={selectedTeam}
+          onChange={(e) =>
+            setSelectedTeam(e.target.value)
+          }
+          style={{
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid #dcdcdc',
+            minWidth: '150px'
+          }}
+        >
+
+          <option value=''>
+            Select Team
+          </option>
+
+          {
+            teams.map(team => (
+
+              <option
+                key={team}
+                value={team}
+              >
+                {team}
+              </option>
+
+            ))
+          }
+
+        </select>
+
+        {/* ROUTE BUTTON */}
+
+        {
+          route &&
+          route.Route_Link &&
+
+          <a
+            href={route.Route_Link}
+            target='_blank'
+            rel='noreferrer'
+            style={{
+              background: '#2d6a4f',
+              color: 'white',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              fontWeight: '700'
+            }}
+          >
+            🚗 Open Route
+          </a>
+        }
+
+        {/* DOWNLOAD REPORT */}
+
+        <a
+          href="https://farm-webapp-6ew5.onrender.com/download-report"
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            background: '#1d3557',
+            color: 'white',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            textDecoration: 'none',
+            fontWeight: '700'
+          }}
+        >
+          📥 Download Report
+        </a>
+
+      </div>
+
+      {/* PROGRESS */}
 
       <div
         style={{
           display: 'flex',
-          gap: '12px',
-          padding: '15px',
-          background: 'white',
-          borderBottom: '1px solid #e5e5e5',
+          gap: '15px',
+          padding: '20px',
           flexWrap: 'wrap'
         }}
       >
 
-        <button
-          onClick={() =>
-            setActivePage('dashboard')
-          }
+        <div
           style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: 'none',
-            cursor: 'pointer',
-            background:
-              activePage === 'dashboard'
-                ? '#1b4332'
-                : '#edf2ef',
-            color:
-              activePage === 'dashboard'
-                ? 'white'
-                : '#1b4332',
-            fontWeight: '700'
+            background: '#d8f3dc',
+            padding: '16px',
+            borderRadius: '16px',
+            minWidth: '180px'
           }}
         >
-          📋 Dashboard
-        </button>
+          <h3>✅ Completed</h3>
+          <h1>{completedCount}</h1>
+        </div>
 
-        <button
-          onClick={() =>
-            setActivePage('search')
-          }
+        <div
           style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: 'none',
-            cursor: 'pointer',
-            background:
-              activePage === 'search'
-                ? '#1b4332'
-                : '#edf2ef',
-            color:
-              activePage === 'search'
-                ? 'white'
-                : '#1b4332',
-            fontWeight: '700'
+            background: '#ffe5d9',
+            padding: '16px',
+            borderRadius: '16px',
+            minWidth: '180px'
           }}
         >
-          🔍 Search Farmer
-        </button>
-
-        <button
-          onClick={() =>
-            setActivePage('performance')
-          }
-          style={{
-            padding: '12px 18px',
-            borderRadius: '12px',
-            border: 'none',
-            cursor: 'pointer',
-            background:
-              activePage === 'performance'
-                ? '#1b4332'
-                : '#edf2ef',
-            color:
-              activePage === 'performance'
-                ? 'white'
-                : '#1b4332',
-            fontWeight: '700'
-          }}
-        >
-          📊 Team Performance
-        </button>
+          <h3>⏳ Pending</h3>
+          <h1>{pendingCount}</h1>
+        </div>
 
       </div>
 
-      {/* DASHBOARD */}
+      {/* MAIN */}
 
-      {
-        activePage === 'dashboard' && (
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns:
+            window.innerWidth < 768
+              ? '1fr'
+              : '390px 1fr',
+          gap: '20px',
+          padding: '20px'
+        }}
+      >
 
-          <>
-            {/* FILTER BAR */}
+        {/* LEFT PANEL */}
 
-            <div
-              style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 1000,
-                background: 'white',
-                padding: '15px',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '10px',
-                alignItems: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-              }}
-            >
+        <div
+          style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '18px',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+          }}
+        >
 
-              <select
-                value={selectedDay}
-                onChange={(e) => {
+          <h2
+            style={{
+              marginTop: 0,
+              marginBottom: '18px',
+              fontSize: '32px',
+              fontWeight: '800'
+            }}
+          >
+            📋 Assigned Farmers
+          </h2>
 
-                  setSelectedDay(e.target.value)
+          {
+            farmers.map((farmer, index) => {
 
-                  setSelectedTeam('')
-                  setFarmers([])
-                  setRoute(null)
+              const isCompleted =
+                completedFarmers.includes(
+                  farmer['Bp Number']
+                )
 
-                }}
-                style={{
-                  padding: '12px',
-                  borderRadius: '12px',
-                  border: '1px solid #dcdcdc',
-                  minWidth: '150px'
-                }}
-              >
+              return (
 
-                <option value=''>
-                  Select Date
-                </option>
-
-                {
-                  days.map(day => (
-
-                    <option
-                      key={day}
-                      value={day}
-                    >
-                      {day}
-                    </option>
-
-                  ))
-                }
-
-              </select>
-
-              <select
-                value={selectedTeam}
-                onChange={(e) =>
-                  setSelectedTeam(e.target.value)
-                }
-                style={{
-                  padding: '12px',
-                  borderRadius: '12px',
-                  border: '1px solid #dcdcdc',
-                  minWidth: '150px'
-                }}
-              >
-
-                <option value=''>
-                  Select Team
-                </option>
-
-                {
-                  teams.map(team => (
-
-                    <option
-                      key={team}
-                      value={team}
-                    >
-                      {team}
-                    </option>
-
-                  ))
-                }
-
-              </select>
-
-              {
-                route &&
-                route.Route_Link &&
-
-                <a
-                  href={route.Route_Link}
-                  target='_blank'
-                  rel='noreferrer'
+                <div
+                  key={index}
                   style={{
-                    background: '#2d6a4f',
-                    color: 'white',
-                    padding: '12px 20px',
-                    borderRadius: '12px',
-                    textDecoration: 'none',
-                    fontWeight: '700'
+                    border: isCompleted
+                      ? '2px solid #2d6a4f'
+                      : '1px solid #e8ecef',
+
+                    borderRadius: '24px',
+                    padding: '20px',
+                    marginBottom: '18px',
+                    background: '#ffffff',
+                    boxShadow:
+                      '0 6px 18px rgba(0,0,0,0.06)'
                   }}
                 >
-                  🚗 Open Route
-                </a>
-              }
 
-              <a
-                href="https://farm-webapp-6ew5.onrender.com/download-report"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  background: '#1d3557',
-                  color: 'white',
-                  padding: '12px 20px',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  fontWeight: '700'
-                }}
-              >
-                📥 Download Report
-              </a>
-
-            </div>
-
-            {/* PROGRESS */}
-
-            <div
-              style={{
-                display: 'flex',
-                gap: '15px',
-                padding: '20px',
-                flexWrap: 'wrap'
-              }}
-            >
-
-              <div
-                style={{
-                  background: '#d8f3dc',
-                  padding: '16px',
-                  borderRadius: '16px',
-                  minWidth: '180px'
-                }}
-              >
-                <h3>✅ Completed</h3>
-                <h1>{completedCount}</h1>
-              </div>
-
-              <div
-                style={{
-                  background: '#ffe5d9',
-                  padding: '16px',
-                  borderRadius: '16px',
-                  minWidth: '180px'
-                }}
-              >
-                <h3>⏳ Pending</h3>
-                <h1>{pendingCount}</h1>
-              </div>
-
-            </div>
-
-          </>
-        )
-      }
-
-      {/* SEARCH PAGE */}
-
-      {
-        activePage === 'search' && (
-
-          <div style={{ padding: '20px' }}>
-
-            <div
-              style={{
-                background: 'white',
-                padding: '20px',
-                borderRadius: '20px'
-              }}
-            >
-
-              <h2>
-                🔍 Search Farmer
-              </h2>
-
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '10px',
-                  marginTop: '20px'
-                }}
-              >
-
-                <input
-
-                  type="text"
-
-                  placeholder="Search BP Number / Name / Village"
-
-                  value={searchQuery}
-
-                  onChange={(e) =>
-                    setSearchQuery(e.target.value)
-                  }
-
-                  style={{
-
-                    flex: 1,
-
-                    padding: '14px',
-
-                    borderRadius: '12px',
-
-                    border: '1px solid #ccc'
-
-                  }}
-                />
-
-                <button
-
-                  onClick={searchFarmer}
-
-                  style={{
-
-                    padding: '14px 20px',
-
-                    borderRadius: '12px',
-
-                    border: 'none',
-
-                    background: '#1b4332',
-
-                    color: 'white',
-
-                    fontWeight: '700',
-
-                    cursor: 'pointer'
-
-                  }}
-                >
-                  Search
-                </button>
-
-              </div>
-
-              <div style={{ marginTop: '20px' }}>
-
-                {
-                  searchResults.map((farmer, index) => (
-
-                    <div
-                      key={index}
-                      style={{
-                        background: '#f8faf9',
-                        padding: '18px',
-                        borderRadius: '16px',
-                        marginBottom: '14px'
-                      }}
-                    >
-
-                      <h3>
-                        {farmer.bp_number}
-                      </h3>
-
-                      <p>
-                        {farmer.farmer_name}
-                      </p>
-
-                      <p>
-                        📍 {farmer.village}
-                      </p>
-
-                      <p>
-                        📅 Day: {farmer.day}
-                      </p>
-
-                      <p>
-                        👥 Team: {farmer.team}
-                      </p>
-
-                    </div>
-
-                  ))
-                }
-
-              </div>
-
-            </div>
-
-          </div>
-
-        )
-      }
-
-      {/* PERFORMANCE PAGE */}
-
-      {
-        activePage === 'performance' && (
-
-          <div style={{ padding: '20px' }}>
-
-            <h2>
-              📊 Team Performance
-            </h2>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns:
-                  'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '20px',
-                marginTop: '20px'
-              }}
-            >
-
-              {
-                teamPerformance.map((team, index) => (
+                  {/* BP NUMBER */}
 
                   <div
-                    key={index}
                     style={{
-                      background: 'white',
-                      padding: '22px',
-                      borderRadius: '20px',
-                      boxShadow:
-                        '0 4px 14px rgba(0,0,0,0.08)'
+                      fontWeight: '800',
+                      color: '#1b4332',
+                      fontSize: '18px'
+                    }}
+                  >
+                    {farmer['Bp Number']}
+                  </div>
+
+                  {/* Farmer Nam */}
+
+                  <div
+                    style={{
+                      marginTop: '10px',
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#2b2d42'
+                    }}
+                  >
+                    {farmer['Farmer Nam']}
+                  </div>
+
+                  {/* VILLAGE */}
+
+                  <div
+                    style={{
+                      marginTop: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
                     }}
                   >
 
-                    <h2>
-                      {team.team}
-                    </h2>
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
+                      alt="village"
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        opacity: 0.8
+                      }}
+                    />
 
-                    <p>
-                      ✅ Completed:
-                      {' '}
-                      {team.completed}
-                    </p>
-
-                    <p>
-                      ⏳ Pending:
-                      {' '}
-                      {team.pending}
-                    </p>
-
-                    <p>
-                      📈 Efficiency:
-                      {' '}
-                      {team.efficiency}%
-                    </p>
+                    <div
+                      style={{
+                        color: '#555',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {farmer['village']}
+                    </div>
 
                   </div>
 
-                ))
-              }
+                  {/* PHONE */}
+
+                  <div
+                    style={{
+                      marginTop: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}
+                  >
+
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/724/724664.png"
+                      alt="phone"
+                      style={{
+                        width: '18px',
+                        height: '18px'
+                      }}
+                    />
+
+                    <a
+                      href={`tel:${farmer['phone number']}`}
+                      style={{
+                        textDecoration: 'none',
+                        color: '#444',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {farmer['phone number']}
+                    </a>
+
+                  </div>
+                  {/* COMMENTS */}
+
+                  <textarea
+
+                    placeholder="Add field comment..."
+
+                   defaultValue={
+                     comments[farmer['Bp Number']] || ''
+                   }
+
+                   onBlur={(e) =>
+
+                     saveComment(
+
+                       farmer['Bp Number'],
+
+                       e.target.value
+
+                     )
+                   }
+
+                   style={{
+
+                     width: '100%',
+
+                     boxSizing: 'border-box',
+
+                     marginTop: '15px',
+
+                     padding: '10px',
+
+                     borderRadius: '12px',
+
+                     border: '1px solid #dcdcdc',
+
+                     minHeight: '55px',
+
+                     resize: 'none',
+
+                     fontSize: '14px',
+                     
+                     fontFamily: 'inherit'
+
+                  }}
+                 />
+
+                  {/* SEE MORE + LOCATION */}
+
+                  <div
+                    style={{
+                      marginTop: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}
+                  >
+
+                    <button
+                      onClick={() => {
+
+                        setExpandedFarmer(
+                          expandedFarmer === index
+                            ? null
+                            : index
+                        )
+
+                      }}
+                      style={{
+                        flex: 1,
+                        background: '#f1f5f3',
+                        border: '1px solid #dbe7df',
+                        padding: '12px 16px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        color: '#1b4332',
+                        fontSize: '14px'
+                      }}
+                    >
+                      {
+                        expandedFarmer === index
+                          ? '▲ Hide Details'
+                          : '▼ See More'
+                      }
+                    </button>
+
+                    <a
+                      href={`https://www.google.com/maps?q=${farmer.Lat},${farmer.Long}`}
+                      target='_blank'
+                      rel='noreferrer'
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: '#edf6f1',
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '14px',
+                        flexShrink: 0
+                      }}
+                    >
+
+                      <img
+                        src="https://cdn-icons-png.flaticon.com/512/2991/2991231.png"
+                        alt="maps"
+                        style={{
+                          width: '26px',
+                          height: '26px'
+                        }}
+                      />
+
+                    </a>
+
+                  </div>
+
+                  {/* DETAILS */}
+
+                  {
+                    expandedFarmer === index &&
+
+                    <div
+                      style={{
+                        marginTop: '18px',
+                        padding: '18px',
+                        background: '#f8faf9',
+                        borderRadius: '16px',
+                        border: '1px solid #dde7e1'
+                      }}
+                    >
+
+                      <h4
+                        style={{
+                          marginTop: 0,
+                          marginBottom: '16px',
+                          color: '#1b4332'
+                        }}
+                      >
+                        Farmer Details
+                      </h4>
+
+                      {
+                        Object.entries(farmer).map(
+                          ([key, value]) => (
+
+                            <div
+                              key={key}
+                              style={{
+                                marginBottom: '10px',
+                                fontSize: '14px',
+                                lineHeight: '1.6'
+                              }}
+                            >
+
+                              <strong>
+                                {key}:
+                              </strong>
+
+                              {' '}
+
+                              {String(value)}
+
+                            </div>
+
+                          )
+                        )
+                      }
+
+                    </div>
+                  }
+
+                  {/* ACTION */}
+
+                  <div
+                    style={{
+                      marginTop: '20px'
+                    }}
+                  >
+
+                    {
+                      !isCompleted &&
+
+                      <button
+                        onClick={() =>
+                          completeFarmer(
+                            farmer['Bp Number']
+                          )
+                        }
+                        style={{
+                          width: '100%',
+                          background:
+                            'linear-gradient(135deg, #2d6a4f, #1b4332)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '16px',
+                          borderRadius: '16px',
+                          cursor: 'pointer',
+                          fontWeight: '700'
+                        }}
+                      >
+                        ✅ Mark Complete
+                      </button>
+                    }
+
+                    {
+                      isCompleted &&
+
+                      <button
+                        onClick={() =>
+                          undoComplete(
+                            farmer['Bp Number']
+                          )
+                        }
+                        style={{
+                          width: '100%',
+                          background:
+                            'linear-gradient(135deg, #c1121f, #9b2226)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '16px',
+                          borderRadius: '16px',
+                          cursor: 'pointer',
+                          fontWeight: '700'
+                        }}
+                      >
+                        ↩ Undo Completion
+                      </button>
+                    }
+
+                  </div>
+
+                </div>
+
+              )
+
+            })
+          }
+
+        </div>
+
+        {/* MAP */}
+
+        <div>
+
+          <button
+            onClick={() =>
+              setShowMap(!showMap)
+            }
+            style={{
+              background: '#1d3557',
+              color: 'white',
+              border: 'none',
+              padding: '14px 20px',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              marginBottom: '15px',
+              fontWeight: '700',
+              width: '100%'
+            }}
+          >
+            {
+              showMap
+                ? '❌ Close Map'
+                : '🗺 Open Map'
+            }
+          </button>
+
+          {
+            showMap &&
+
+            <div
+              style={{
+                borderRadius: '16px',
+                overflow: 'hidden',
+                boxShadow:
+                  '0 4px 14px rgba(0,0,0,0.08)'
+              }}
+            >
+
+              <MapContainer
+                center={[12.2958, 75.6433]}
+                zoom={10}
+                style={{
+                  height: '80vh',
+                  width: '100%'
+                }}
+              >
+
+                <ZoomToFarmers farmers={farmers} />
+
+                <FixMapResize />
+
+                <TileLayer
+                  attribution='Google Hybrid'
+                  url='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+                />
+
+                {
+                  farmers
+                    .filter(farmer =>
+                      farmer.Lat &&
+                      farmer.Long
+                    )
+                    .map((farmer, index) => (
+
+                      <Marker
+                        key={index}
+                        position={[
+                          parseFloat(farmer.Lat),
+                          parseFloat(farmer.Long)
+                        ]}
+                      >
+
+                        <Popup>
+
+                          <div
+                            style={{
+                              minWidth: '180px'
+                            }}
+                          >
+
+                            <h3>
+                              {farmer['Bp Number']}
+                            </h3>
+
+                            <p>
+                              {farmer['Farmer Nam']}
+                            </p>
+
+                          </div>
+
+                        </Popup>
+
+                      </Marker>
+
+                    ))
+                }
+
+              </MapContainer>
 
             </div>
+          }
 
-          </div>
+        </div>
 
-        )
-      }
+      </div>
 
     </div>
   )
