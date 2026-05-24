@@ -166,7 +166,7 @@ function App() {
       )
 
       const completed = res.data.map(
-        item => item['Bp Number farms']
+        item => item['Bp Number']
       )
 
       setCompletedFarmers(completed)
@@ -235,7 +235,7 @@ function App() {
 
   const completedCount = farmers.filter(farmer =>
     completedFarmers.includes(
-      farmer['Bp Number farms']
+      farmer['Bp Number']
     )
   ).length
 
@@ -500,7 +500,7 @@ function App() {
 
               const isCompleted =
                 completedFarmers.includes(
-                  farmer['Bp Number farms']
+                  farmer['Bp Number']
                 )
 
               return (
@@ -530,10 +530,10 @@ function App() {
                       fontSize: '18px'
                     }}
                   >
-                    {farmer['Bp Number farms']}
+                    {farmer['Bp Number']}
                   </div>
 
-                  {/* FARMER NAME */}
+                  {/* Farmer Nam */}
 
                   <div
                     style={{
@@ -543,7 +543,7 @@ function App() {
                       color: '#2b2d42'
                     }}
                   >
-                    {farmer['Farmer Name']}
+                    {farmer['Farmer Nam']}
                   </div>
 
                   {/* VILLAGE */}
@@ -750,7 +750,7 @@ function App() {
                       <button
                         onClick={() =>
                           completeFarmer(
-                            farmer['Bp Number farms']
+                            farmer['Bp Number']
                           )
                         }
                         style={{
@@ -775,7 +775,7 @@ function App() {
                       <button
                         onClick={() =>
                           undoComplete(
-                            farmer['Bp Number farms']
+                            farmer['Bp Number']
                           )
                         }
                         style={{
@@ -887,11 +887,11 @@ function App() {
                           >
 
                             <h3>
-                              {farmer['Bp Number farms']}
+                              {farmer['Bp Number']}
                             </h3>
 
                             <p>
-                              {farmer['Farmer Name']}
+                              {farmer['Farmer Nam']}
                             </p>
 
                           </div>
