@@ -183,16 +183,72 @@ useEffect(() => {
 
   loadProgress()
 
+  loadComments()
+
   const interval = setInterval(() => {
 
     loadProgress()
 
-  }, 2000)
+    loadComments()
+
+  }, 3000)
 
   return () => clearInterval(interval)
 
 }, [])
 
+  const [comments, setComments] = useState({})
+  const loadComments = async () => {
+
+    try {
+
+      const res = await axios.get(
+        'https://farm-webapp-6ew5.onrender.com/comments'
+      )
+
+      const commentMap = {}
+
+      res.data.forEach(item => {
+
+        commentMap[item['Bp Number']] =
+          item['Comment']
+
+      })
+
+      setComments(commentMap)
+
+    } catch (error) {
+
+      console.log(error)
+
+    }
+  }
+  const saveComment = async (
+    bpNumber,
+    comment
+  ) => {
+
+    try {
+
+      await axios.post(
+
+        `https://farm-webapp-6ew5.onrender.com/comment/${bpNumber}`,
+
+        {
+          comment: comment
+        }
+
+      )
+
+      loadComments()
+
+    } catch (error) {
+
+      console.log(error)
+
+    }
+  }
+  
   // ---------------------------------------------------
   // COMPLETE FARMER
   // ---------------------------------------------------
@@ -619,6 +675,47 @@ useEffect(() => {
                     </a>
 
                   </div>
+                  {/* COMMENTS */}
+
+                  <textarea
+
+                    placeholder="Add field comment..."
+
+                   defaultValue={
+                     comments[farmer['Bp Number']] || ''
+                   }
+
+                   onBlur={(e) =>
+
+                     saveComment(
+
+                       farmer['Bp Number'],
+
+                       e.target.value
+
+                     )
+                   }
+
+                   style={{
+
+                     width: '100%',
+
+                     marginTop: '15px',
+
+                     padding: '12px',
+
+                     borderRadius: '12px',
+
+                     border: '1px solid #dcdcdc',
+
+                     minHeight: '80px',
+
+                     resize: 'vertical',
+
+                     fontSize: '14px'
+
+                  }}
+                 />
 
                   {/* SEE MORE + LOCATION */}
 
