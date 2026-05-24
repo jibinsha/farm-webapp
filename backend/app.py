@@ -23,7 +23,21 @@ with engine.begin() as conn:
         )
 
     """))
+    conn.execute(text("""
 
+        CREATE TABLE IF NOT EXISTS farmer_comments (
+
+            id SERIAL PRIMARY KEY,
+
+            bp_number TEXT,
+
+            comment TEXT,
+
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+        )
+
+    """))
 # ---------------------------------------------------
 # APP
 # ---------------------------------------------------
@@ -200,6 +214,69 @@ def get_route(day: str, team: str):
         return {}
 
     return filtered.iloc[0].to_dict()
+# ---------------------------------------------------
+# SAVE COMMENT
+# ---------------------------------------------------
+
+@app.post("/comment/{bp_number}")
+def save_comment(bp_number: str, data: dict):
+
+    comment = data.get("comment", "")
+
+    with engine.begin() as conn:
+
+        # delete old comment
+        conn.execute(text("""
+
+            DELETE FROM farmer_comments
+
+            WHERE bp_number = :bp
+
+        """), {"bp": bp_number})
+
+        # insert new comment
+        conn.execute(text("""
+
+            INSERT INTO farmer_comments
+            (bp_number, comment)
+
+            VALUES (:bp, :comment)
+
+        """), {
+
+            "bp": bp_number,
+
+            "comment": comment
+        })
+
+    return {"status": "saved"}
+# ---------------------------------------------------
+# GET COMMENTS
+# ---------------------------------------------------
+
+@app.get("/comments")
+def get_comments():
+
+    with engine.begin() as conn:
+
+        result = conn.execute(text("""
+
+            SELECT bp_number, comment
+            FROM farmer_comments
+
+        """))
+
+        comments = [
+
+            {
+                "Bp Number": row[0],
+                "Comment": row[1]
+            }
+
+            for row in result.fetchall()
+        ]
+
+    return comments
 
 # ---------------------------------------------------
 # COMPLETE FARMER
