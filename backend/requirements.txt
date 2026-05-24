@@ -9,3 +9,5 @@ networkx
 scikit-learn
 python-tsp
 numpy
+sqlalchemy
+psycopg2-binary
