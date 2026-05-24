@@ -179,11 +179,19 @@ function App() {
 
   }
 
-  useEffect(() => {
+useEffect(() => {
+
+  loadProgress()
+
+  const interval = setInterval(() => {
 
     loadProgress()
 
-  }, [])
+  }, 3000)
+
+  return () => clearInterval(interval)
+
+}, [])
 
   // ---------------------------------------------------
   // COMPLETE FARMER
