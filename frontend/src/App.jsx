@@ -700,19 +700,23 @@ useEffect(() => {
 
                      width: '100%',
 
+                     boxSizing: 'border-box',
+
                      marginTop: '15px',
 
-                     padding: '12px',
+                     padding: '10px',
 
                      borderRadius: '12px',
 
                      border: '1px solid #dcdcdc',
 
-                     minHeight: '80px',
+                     minHeight: '55px',
 
-                     resize: 'vertical',
+                     resize: 'none',
 
                      fontSize: '14px'
+                     
+                     fontFamily: 'inherit'
 
                   }}
                  />
