@@ -90,6 +90,34 @@ def get_progress():
         ]
 
     return completed
+# ---------------------------------------------------
+# GET DAYS
+# ---------------------------------------------------
+
+@app.get("/days")
+def get_days():
+
+    try:
+
+        days = sorted(
+
+            farmers_df['Day']
+            .dropna()
+            .astype(str)
+            .unique()
+            .tolist(),
+
+            key=lambda x: int(x)
+
+        )
+
+        return days
+
+    except Exception as e:
+
+        return {
+            "error": str(e)
+        }
 
 # ---------------------------------------------------
 # GET TEAMS
@@ -215,18 +243,7 @@ def undo_farmer(bp_number: str):
 
     return {"status": "success"}
 
-# ---------------------------------------------------
-# GET PROGRESS
-# ---------------------------------------------------
 
-@app.get("/progress")
-def get_progress():
-
-    progress_df = pd.read_csv(progress_file)
-
-    return progress_df.to_dict(
-        orient='records'
-    )
 
 # ---------------------------------------------------
 # DOWNLOAD REPORT
