@@ -63,28 +63,18 @@ if not os.path.exists(progress_file):
 
     progress_df.to_csv(progress_file, index=False)
 
-# ---------------------------------------------------
-# GET DATES
-# ---------------------------------------------------
-
 @app.get("/days")
 def get_days():
 
-    # Convert to datetime for proper sorting
-    farmers_df['Date'] = pd.to_datetime(
-        farmers_df['Date'],
-        errors='coerce'
+    days = sorted(
+        farmers_df['Day']
+        .astype(str)
+        .unique()
+        .tolist(),
+        key=lambda x: int(x)
     )
 
-    # Sort dates properly
-    sorted_dates = farmers_df['Date'] \
-        .dropna() \
-        .sort_values() \
-        .dt.strftime('%d-%m-%Y') \
-        .unique() \
-        .tolist()
-
-    return sorted_dates
+    return days
 
 # ---------------------------------------------------
 # GET TEAMS
@@ -93,15 +83,8 @@ def get_days():
 @app.get("/teams/{day}")
 def get_teams(day: str):
 
-    # Convert incoming string to datetime
-    selected_date = pd.to_datetime(
-        day,
-        format='%d-%m-%Y',
-        errors='coerce'
-    )
-
     filtered = farmers_df[
-        farmers_df['Date'] == selected_date
+        farmers_df['Day'].astype(str) == str(day)
     ]
 
     teams = sorted(
@@ -117,17 +100,15 @@ def get_teams(day: str):
 # GET VILLAGES
 # ---------------------------------------------------
 
+# ---------------------------------------------------
+# GET VILLAGES
+# ---------------------------------------------------
+
 @app.get("/villages/{day}/{team}")
 def get_villages(day: str, team: str):
 
-    selected_date = pd.to_datetime(
-        day,
-        format='%d-%m-%Y',
-        errors='coerce'
-    )
-
     filtered = farmers_df[
-        (farmers_df['Date'] == selected_date)
+        (farmers_df['Day'].astype(str) == str(day))
         &
         (farmers_df['Team'].astype(str) == str(team))
     ]
@@ -148,14 +129,8 @@ def get_villages(day: str, team: str):
 @app.get("/farmers/{day}/{team}")
 def get_farmers(day: str, team: str):
 
-    selected_date = pd.to_datetime(
-        day,
-        format='%d-%m-%Y',
-        errors='coerce'
-    )
-
     filtered = farmers_df[
-        (farmers_df['Date'] == selected_date)
+        (farmers_df['Day'].astype(str) == str(day))
         &
         (farmers_df['Team'].astype(str) == str(team))
     ]
@@ -172,7 +147,7 @@ def get_farmers(day: str, team: str):
 def get_route(day: str, team: str):
 
     filtered = routes_df[
-        (routes_df['Date'].astype(str) == str(day))
+        (routes_df['Day'].astype(str) == str(day))
         &
         (routes_df['Team'].astype(str) == str(team))
     ]
@@ -293,8 +268,8 @@ def download_report():
     # Sort report
     sort_columns = []
 
-    if 'Date' in merged.columns:
-        sort_columns.append('Date')
+    if 'Day' in merged.columns:
+        sort_columns.append('Day')
 
     if 'Team' in merged.columns:
         sort_columns.append('Team')
