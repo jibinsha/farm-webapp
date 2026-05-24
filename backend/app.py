@@ -9,9 +9,9 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy import text
 
-DATABASE_URL = os.getenv("postgresql://farmbd_user:AdBrkpWbJsqd2NfLd9NB9u3umr451PLL@dpg-d89cmmvavr4c73chgl6g-a/farmbd")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(postgresql://farmbd_user:AdBrkpWbJsqd2NfLd9NB9u3umr451PLL@dpg-d89cmmvavr4c73chgl6g-a/farmbd)
+engine = create_engine(DATABASE_URL)
 with engine.begin() as conn:
 
     conn.execute(text("""
