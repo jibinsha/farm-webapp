@@ -12,6 +12,12 @@ from datetime import datetime
 # ---------------------------------------------------
 
 app = FastAPI()
+@app.get("/")
+def home():
+
+    return {
+        "message": "Farm Backend Running Successfully"
+    }
 
 app.add_middleware(
     CORSMiddleware,
