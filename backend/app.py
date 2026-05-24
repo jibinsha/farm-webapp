@@ -56,7 +56,7 @@ routes_df = routes_df.fillna("")
 if not os.path.exists(progress_file):
 
     progress_df = pd.DataFrame(columns=[
-        "Bp Number farms",
+        "Bp Number",
         "Status",
         "Completed_Time"
     ])
@@ -172,13 +172,13 @@ def complete_farmer(bp_number: str):
     )
 
     progress_df = progress_df[
-        progress_df['Bp Number farms']
+        progress_df['Bp Number']
         !=
         bp_number
     ]
 
     new_row = pd.DataFrame([{
-        "Bp Number farms": bp_number,
+        "Bp Number": bp_number,
         "Status": "Completed",
         "Completed_Time": current_time
     }])
@@ -207,7 +207,7 @@ def undo_complete(bp_number: str):
     progress_df = pd.read_csv(progress_file)
 
     progress_df = progress_df[
-        progress_df['Bp Number farms']
+        progress_df['Bp Number']
         !=
         bp_number
     ]
@@ -245,14 +245,14 @@ def download_report():
 
     # Remove duplicates if any
     progress_df = progress_df.drop_duplicates(
-        subset=['Bp Number farms'],
+        subset=['Bp Number'],
         keep='last'
     )
 
     # Merge with all farmer data
     merged = farmers_df.merge(
         progress_df,
-        on="Bp Number farms",
+        on="Bp Number",
         how="left"
     )
 
