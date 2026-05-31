@@ -9,7 +9,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from fastapi.middleware.gzip import GZipMiddleware
-
+app = FastAPI()
 app.add_middleware(
     GZipMiddleware,
     minimum_size=1000
