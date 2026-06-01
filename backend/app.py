@@ -4,6 +4,11 @@ from fastapi.responses import FileResponse
 
 import pandas as pd
 import os
+from functools import lru_cache
+
+@lru_cache
+def load_farmers():
+    return pd.read_csv("Final_Field_Plan.csv")
 
 from datetime import datetime
 from sqlalchemy import create_engine
@@ -68,17 +73,19 @@ app.add_middleware(
 # FILES
 # ---------------------------------------------------
 
-farmers_file = "data/Final_Field_Plan.xlsx"
+farmers_file = "data/Final_Field_Plan.csv"
 
 routes_file = "data/Final_Routes.xlsx"
 
 progress_file = "progress.csv"
 
+
+
 # ---------------------------------------------------
 # LOAD DATA
 # ---------------------------------------------------
 
-farmers_df = pd.read_excel(farmers_file)
+farmers_df = pd.read_csv(farmers_file)
 
 routes_df = pd.read_excel(routes_file)
 
