@@ -108,7 +108,7 @@ function App() {
   useEffect(() => {
 
     axios.get(
-      'https://farm-webapp-6ew5.onrender.com/days'
+      'https://farm-webapp-final.onrender.com/days'
     )
       .then(res => setDays(res.data))
       .catch(err => console.log(err))
@@ -124,7 +124,7 @@ function App() {
     if (!selectedDay) return
 
     axios.get(
-      `https://farm-webapp-6ew5.onrender.com/teams/${selectedDay}`
+      `https://farm-webapp-final.onrender.com/teams/${selectedDay}`
     )
       .then(res => setTeams(res.data))
       .catch(err => console.log(err))
@@ -140,13 +140,13 @@ function App() {
     if (!selectedDay || !selectedTeam) return
 
     axios.get(
-      `https://farm-webapp-6ew5.onrender.com/farmers/${selectedDay}/${selectedTeam}`
+      `https://farm-webapp-final.onrender.com/farmers/${selectedDay}/${selectedTeam}`
     )
       .then(res => setFarmers(res.data))
       .catch(err => console.log(err))
 
     axios.get(
-      `https://farm-webapp-6ew5.onrender.com/route/${selectedDay}/${selectedTeam}`
+      `https://farm-webapp-final.onrender.com/route/${selectedDay}/${selectedTeam}`
     )
       .then(res => setRoute(res.data))
       .catch(err => console.log(err))
@@ -162,7 +162,7 @@ function App() {
     try {
 
       const res = await axios.get(
-        'https://farm-webapp-6ew5.onrender.com/progress'
+        'https://farm-webapp-final.onrender.com/progress'
       )
 
       const completed = res.data.map(
@@ -203,7 +203,7 @@ useEffect(() => {
     try {
 
       const res = await axios.get(
-        'https://farm-webapp-6ew5.onrender.com/comments'
+        'https://farm-webapp-final.onrender.com/comments'
       )
 
       const commentMap = {}
@@ -232,7 +232,7 @@ useEffect(() => {
 
       await axios.post(
 
-        `https://farm-webapp-6ew5.onrender.com/comment/${bpNumber}`,
+        `https://farm-webapp-final.onrender.com/comment/${bpNumber}`,
 
         {
           comment: comment
@@ -258,7 +258,7 @@ useEffect(() => {
     try {
 
       await axios.post(
-        `https://farm-webapp-6ew5.onrender.com/complete/${bpNumber}`
+        `https://farm-webapp-final.onrender.com/complete/${bpNumber}`
       )
 
       loadProgress()
@@ -280,7 +280,7 @@ useEffect(() => {
     try {
 
       await axios.post(
-        `https://farm-webapp-6ew5.onrender.com/undo/${bpNumber}`
+        `https://farm-webapp-final.onrender.com/undo/${bpNumber}`
       )
 
       loadProgress()
@@ -469,7 +469,7 @@ useEffect(() => {
         {/* DOWNLOAD REPORT */}
 
         <a
-          href="https://farm-webapp-6ew5.onrender.com/download-report"
+          href="https://farm-webapp-final.onrender.com/download-report"
           target="_blank"
           rel="noreferrer"
           style={{
